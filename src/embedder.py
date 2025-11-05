@@ -3,11 +3,18 @@ import numpy as np
 from typing import *
 import logging
 import torch
+from src.core.config import settings
 
 logging.basicConfig(level=logging.DEBUG)
 
 class EmbeddingModel():
-    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2", device: str = "cpu"):
+    def __init__(self, model_name: str = None, device: str = None, batch_size: int = None):
+        if not model_name:
+            model_name = settings.model_name
+        if not device:
+            device = settings.device
+        if not batch_size:
+            batch_size = settings.batch_size
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(model_name)
             logging.info("Токенизатор успешно загружен")
@@ -21,13 +28,14 @@ class EmbeddingModel():
         device = torch.device(device)
         self.model.to(device)
         logging.info(f"Текущий девайс: {device}")
+        self.batch_size = batch_size
 
-    def encode(self, texts: List[str], batch_size: int) -> np.ndarray:
+    def encode(self, texts: List[str]) -> np.ndarray:
         logging.info("Генерация эмбеддингов...")
         embeddings_np = []
-        for i in range(0, len(texts), batch_size):
-            logging.info(f"Батч {i // batch_size + 1}/{len(texts)+batch_size-1//batch_size}")
-            batch = texts[i:i+batch_size]
+        for i in range(0, len(texts), self.batch_size):
+            logging.info(f"Батч {i // self.batch_size + 1}/{(len(texts)+self.batch_size-1)//self.batch_size}")
+            batch = texts[i:i+self.batch_size]
             inputs = self.tokenizer(batch, padding=True, truncation=True, return_tensors="pt")
             outputs = self.model(**inputs)
             embeddings = outputs.last_hidden_state[:, 0, :]
