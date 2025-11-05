@@ -37,10 +37,10 @@ query_text = ["На протяжении всей истории человеч�
 
 embedder = EmbeddingModel()
 vector_store = VectorStore(embedder.get_embeddings_dim(), use_cosine_similarity=True)
-vectors = embedder.encode(texts_list, batch_size=10)
+vectors = embedder.encode(texts_list)
 vector_store.add_vectors(vectors, texts_list)
 
-res = vector_store.search(embedder.encode(query_text, batch_size=1), top_k=3)
+res = vector_store.search(embedder.encode(query_text))
 print(f"Входной текст: {query_text}")
 for num, d in enumerate(res):
     print(f'Топ {num+1} текст (scores = {d["score"]}):')
