@@ -26,7 +26,7 @@ def get_latest_file(directory: Path, extension: str):
         date = int(date)
         if date > latest:
             res = file
-        return res
+    return res
 
 class VectorStore():
     def __init__(self, embeddings_dim: int, use_cosine_similarity: bool = None):
@@ -85,7 +85,7 @@ class VectorStore():
             metadata_path = settings.metadata_path
         logging.info("Загрузка FAISS индекса и метаданных")
         try:
-            if not index_path.parent.exists():
+            if not index_path.exists():
                 logging.warning(f"Директория {index_path} для сохранения FAISS индекса не существует")
                 return False
             else:
@@ -114,6 +114,9 @@ class VectorStore():
 
     def reset(self, index_path: Path = None, metadata_path: Path = None) -> bool:
         logging.info("Очистка индекса, метаданных и файлов хранилища...")
+        if not index_path:
+            index_path = settings.index_path
+            metadata_path = settings.metadata_path
         try:
             self.index.reset()
             self.metadata = []
@@ -140,10 +143,12 @@ class VectorStore():
         else:
             for i in range(len(texts)):
                 self.metadata.append({"doc_id": doc_ids[i], "text": texts[i], "index_position": i+index_start, "timestamp": datetime.now().isoformat()})
-        if abs(self.last_n + len(texts)) >= settings.autosave_interval:
+        if self.last_n + len(texts) >= settings.autosave_interval:
             logging.info("Автоматическое сохранение документов...")
             self.save(settings.index_path, settings.metadata_path)
             self.last_n = 0
+        else:
+            self.last_n += len(texts)
         return vectors.shape[0]
 
     def search(self, query_vector: np.ndarray, top_k: int = 5, threshold: float = 0.5) -> List[Dict]:
