@@ -50,6 +50,16 @@ class VectorStore():
             return {}
         return self.metadata[id-1]
 
+    def delete_doc(self, id: int) -> bool:
+        logging.info(f"Удаление документа {id} из FAISS индекса...")
+        try:
+            self.index.remove_ids(np.array([id]))
+            logging.info(f"Документ {id} успешно удален")
+            return True
+        except Exception as e:
+            logging.error(f"Ошибка при удалении документа из FAISS индекса: {e}")
+            return False
+
     def save(self, index_path: Path = None, metadata_path: Path = None) -> bool:
         if not index_path:
             index_path = settings.index_path
@@ -139,7 +149,7 @@ class VectorStore():
         self.index.add(vectors)
         if not doc_ids:
             for i in range(len(texts)):
-                self.metadata.append({"doc_id": index_start+i, "text": texts[i], "index_position": i+index_start, "timestamp": datetime.now().isoformat()})
+                self.metadata.append({"doc_id": str(index_start+i), "text": texts[i], "index_position": i+index_start, "timestamp": datetime.now().isoformat()})
         else:
             for i in range(len(texts)):
                 self.metadata.append({"doc_id": doc_ids[i], "text": texts[i], "index_position": i+index_start, "timestamp": datetime.now().isoformat()})

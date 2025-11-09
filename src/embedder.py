@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 class EmbeddingModel():
     def __init__(self, model_name: str = None, device: str = None, batch_size: int = None):
         if not model_name:
-            model_name = settings.model_name
+            self.model_name = settings.model_name
         if not device:
             device = settings.device
         if not batch_size:
