@@ -19,6 +19,7 @@ def startup():
         logging.info("Приложение успешно запущено")
     except Exception as e:
         logging.error(f"Ошибка при запуске приложения: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.on_event("shutdown")
 def shutdown():
@@ -27,6 +28,7 @@ def shutdown():
         app.state.vector_store.save()
     except Exception as e:
         logging.error(f"Ошибка при завершении работы приложения: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.exception_handler(ValueError)
 async def handle_value_error(request: Request, exc: ValueError):
@@ -49,6 +51,7 @@ def health():
         return HealthResponse(status="healthy", total_documents=len(app.state.vector_store), model_name=app.state.embedder.model_name, embedding_dim=app.state.embedder.get_embeddings_dim())
     except Exception as e:
         logging.error(f"Ошибка при проверке статуса приложения: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/index")
 def index(request: IndexRequest):
@@ -63,6 +66,7 @@ def index(request: IndexRequest):
         return response
     except Exception as e:
         logging.error(f"Ошибка при обработке запроса на индексацию: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/search")
 def search(request: SearchRequest):
@@ -79,10 +83,11 @@ def search(request: SearchRequest):
         results = app.state.vector_store.search(vector, top_k=top_k, threshold=threshold)
         search_time = (time.time() - start_time) * 1000
         results = [SearchResult(doc_id=result['metadata']['doc_id'], text=result['metadata']['text'], score=result['score'], index_position=result['metadata']['index_position']) for result in results]
-        response = SearchResponse(query=query, results=results, results_count=len(results), search_time_ms=search_time)
+        response = SearchResponse(query=query, results=results, results_count=len(results), search_time_ms=search_time, total_documents=len(app.state.vector_store))
         return response
     except Exception as e:
         logging.error(f"Ошибка при обработке запроса на поиск: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/index/clear")
 def clear():
@@ -92,6 +97,7 @@ def clear():
         return {"message": "Index cleared"}
     except Exception as e:
         logging.error(f"Ошибка при обрабокте запроса на очистку индекса: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run("src.main:app", host="127.0.0.1", port=8000, reload=True)

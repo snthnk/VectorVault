@@ -8,7 +8,7 @@ class DocumentInput(BaseModel):
     Описывает один документ для индексации
     '''
     text: str = Field(min_length=1)
-    doc_id: str = None
+    doc_id: Optional[str] = None
     metadata: Optional[Dict[str, Any]]
 
 class IndexRequest(BaseModel):
