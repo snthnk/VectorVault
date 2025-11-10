@@ -1,6 +1,6 @@
 from pydantic import BaseModel, conlist, Field
 from typing import Optional, Dict, List
-from core.config import settings
+from src.core.config import settings
 from typing import Any
 
 class DocumentInput(BaseModel):
