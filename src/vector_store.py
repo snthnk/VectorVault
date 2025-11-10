@@ -44,21 +44,11 @@ class VectorStore():
     def __len__(self):
         return len(self.metadata)
 
-    def doc(self, id: int) -> Dict:
+    def doc(self, id: str) -> Dict:
         logging.info("Поиск документа по индексу...")
-        if len(self.metadata)-1 < id:
+        if len(self.metadata)-1 < int(id):
             return {}
-        return self.metadata[id-1]
-
-    def delete_doc(self, id: int) -> bool:
-        logging.info(f"Удаление документа {id} из FAISS индекса...")
-        try:
-            self.index.remove_ids(np.array([id]))
-            logging.info(f"Документ {id} успешно удален")
-            return True
-        except Exception as e:
-            logging.error(f"Ошибка при удалении документа из FAISS индекса: {e}")
-            return False
+        return self.metadata[int(id)-1]
 
     def save(self, index_path: Path = None, metadata_path: Path = None) -> bool:
         if not index_path:
@@ -148,11 +138,20 @@ class VectorStore():
         index_start = self.index.ntotal
         self.index.add(vectors)
         if not doc_ids:
-            for i in range(len(texts)):
-                self.metadata.append({"doc_id": str(index_start+i), "text": texts[i], "index_position": i+index_start, "timestamp": datetime.now().isoformat()})
+            doc_ids = [str(index_start+i) for i in range(len(texts))]
         else:
-            for i in range(len(texts)):
-                self.metadata.append({"doc_id": doc_ids[i], "text": texts[i], "index_position": i+index_start, "timestamp": datetime.now().isoformat()})
+            doc_ids = [
+                doc_id if doc_id != None else str(index_start+i) for i, doc_id in enumerate(doc_ids)
+            ]
+        for i in range(len(texts)):
+            self.metadata.append(
+                {
+                    "doc_id": doc_ids[i],
+                    "text": texts[i],
+                    "index_position": i+index_start,
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
         if self.last_n + len(texts) >= settings.autosave_interval:
             logging.info("Автоматическое сохранение документов...")
             self.save(settings.index_path, settings.metadata_path)
