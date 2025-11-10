@@ -1,14 +1,15 @@
-from pydantic import BaseModel, conlist
+from pydantic import BaseModel, conlist, Field
 from typing import Optional, Dict, List
 from core.config import settings
+from typing import Any
 
 class DocumentInput(BaseModel):
     '''
     Описывает один документ для индексации
     '''
-    text: str
-    doc_id: str = len()
-    metadata: Optional[Dict[str, any]]
+    text: str = Field(min_length=1)
+    doc_id: str = None
+    metadata: Optional[Dict[str, Any]]
 
 class IndexRequest(BaseModel):
     '''
@@ -30,7 +31,7 @@ class IndexResponse(BaseModel):
     '''
     indexed_count: int
     total_indexed_count: int
-    message: bool
+    message: str = "Documents indexed successfully"
 
 class SearchResult(BaseModel):
     '''
@@ -55,7 +56,7 @@ class HealthResponse(BaseModel):
     '''
     Ответ health check эндпоинта
     '''
-    status: bool
+    status: str
     total_documents: int
     model_name: str
     embedding_dim: int

@@ -16,12 +16,12 @@ class EmbeddingModel():
         if not batch_size:
             batch_size = settings.batch_size
         try:
-            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
             logging.info("Токенизатор успешно загружен")
         except Exception as e:
             logging.error(f"Не удалось загрузить токенизатор: {e}")
         try:
-            self.model = AutoModel.from_pretrained(model_name)
+            self.model = AutoModel.from_pretrained(self.model_name)
             logging.info("Модель успешно загружена")
         except Exception as e:
             logging.error(f"Не удалось загрузить модель {e}")
