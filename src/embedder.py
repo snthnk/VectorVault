@@ -39,7 +39,7 @@ class EmbeddingModel():
             inputs = self.tokenizer(batch, padding=True, truncation=True, return_tensors="pt")
             outputs = self.model(**inputs)
             embeddings = outputs.last_hidden_state[:, 0, :]
-            if not embeddings_np:
+            if len(embeddings_np) == 0:
                 embeddings_np = embeddings.detach().cpu().numpy()
             else:
                 embeddings_np = np.vstack((embeddings_np, embeddings.detach().cpu().numpy()))
