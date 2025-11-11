@@ -2,8 +2,14 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY . .
+COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "-m", "src.main"]
+COPY src/ ./src/
+
+RUN mkdir -p /app/data/faiss /app/data/metadata
+
+EXPOSE 8000
+
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

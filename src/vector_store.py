@@ -50,7 +50,7 @@ class VectorStore():
             return {}
         return self.metadata[int(id)-1]
 
-    def save(self, index_path: Path = None, metadata_path: Path = None) -> bool:
+    def save(self, index_path: Path = settings.index_path, metadata_path: Path = settings.metadata_path) -> bool:
         if not index_path:
             index_path = settings.index_path
         if not metadata_path:
